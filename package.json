@@ -1,0 +1,7 @@
+{
+  "name": "hexo-generator-optimize",
+  "version": "0.0.1",
+  "main": "index",
+  "dependencies": {
+  }
+}
