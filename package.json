@@ -1,7 +1,37 @@
 {
-  "name": "hexo-generator-optimize",
-  "version": "0.0.1",
+  "name": "hexo-optimize",
+  "version": "2.4.5",
+  "description": "console plugin for Hexo",
   "main": "index",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/itwars/hexo-optimize.git"
+  },
+  "keywords": [
+    "website",
+    "blog",
+    "cms",
+    "framework",
+    "hexo"
+  ],
+  "author": "Mss",
+  "license": {
+    "type": "LGPL",
+    "url": ""
+  },
+  "engines": {
+    "hexo": "*"
+  },
   "dependencies": {
+    "uglify-js": "2.3.x",
+    "css-condense": "0.0.6",
+    "async": "0.2.x"
+  },
+  "devDependencies": {
+    "uglify-js": "*",
+    "imagemin" : "*",
+    "clean-css": "*",
+    "async"    : "*",
+    "zlib"     : "*"
   }
 }

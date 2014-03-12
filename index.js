@@ -1,35 +1,26 @@
 var uglify = require('uglify-js'),
-    cssc = require('css-condense'),
-    async = require('async');
+    imagemin = require('imagemin'),
+    cleanCSS = require('clean-css'),
+    async = require('async'),
+    zlib = require('zlib');
 
 var fs = require('fs'),
     path = require('path'),
     util = require('util');
 
+// File types for Minify.
 var supportedResources = {
     'js': function(content, opts) { return uglify.minify(content, { fromString: true }).code },
-    'css': function(content, opts) {
-            var csscOpts = opts.cssSafe ? {consolidateViaDeclarations: false,
-                                            consolidateMediaQueries: false,
-                                            consolidateViaSelectors: false,
-                                            sortSelectors: false,
-                                            lineBreaks: true} : {};
-            return cssc.compress(content, csscOpts);
-    }
+    'css' : function(content, opts) { return cleanCSS().minify(content); }
 };
 
-/**
- * Navigate a folder recursively and minify resources
- * @param item where to start the navigation from
- */
+// Navigate a folder recursively and minify resources
 var minify = function(item, opts) {
   fs.readdir(item, function(err, files) {
       if (!files) return;
-
       files.forEach(function(file) {
           var target = path.join(item, file);
           var stats = fs.statSync(target);
-
           if ( stats.isDirectory() ) {
               minify(target, opts);
           } else if (stats.isFile()) {
@@ -39,32 +30,29 @@ var minify = function(item, opts) {
   });
 };
 
-/**
- * Util to ignore files that are already minified
- * @param filename file to be tested
- * @returns {boolean} true if already minified, false elsewhere
- */
+// ignore files that are already minified
 var alreadyPacked = function(filename) {
     return (filename.indexOf(".min") > 0 ||
                 filename.indexOf(".pack") > 0);
 };
 
-/**
- * Util to check if we have a minification strategy for given file extension
- * @param fileExt file extension to be tested
- * @returns {boolean} true if we are able to minify given extension, false elsewhere
- */
+// Util to check if we have a minification strategy for given file extension
 var processable = function(fileExt) {
     return (Object.keys(supportedResources)
                     .indexOf(fileExt) > -1);
 };
 
-/**
- * Perform file content minification overwriting the original content
- * @param filename pathname of the file to be minified
- */
+// Perform file content minification overwriting the original content
 var compress = function(filename, opts) {
     var fileExt = path.extname(filename||'').replace(".","");
+
+    // Compress Images
+    if(fileExt == 'png' || fileExt == 'jpg' ||  fileExt == 'jpeg') {
+        imagemin(filename, filename , function(error){
+            if ( error ) throw err;
+            console.log("[info] Compressed");
+        });
+    }
 
     if (alreadyPacked(filename) || !processable(fileExt)) return;
 
@@ -84,14 +72,8 @@ var compress = function(filename, opts) {
     }
 };
 
-/**
- * Plugin hook function.
- *
- * Handled args:
- *      args.silent: do not output anything
- *      args.cssSafe: perform safe CSS minification
- */
-hexo.extend.console.register('gm', 'Generate static site with minified CSS and JS resources', function(args) {
+// Plugin hook function.
+hexo.extend.console.register('optimize', 'Hexo Generator Optimize', function(args) {
     async.series([
         function(next) {
             hexo.call("generate", next)
@@ -103,9 +85,38 @@ hexo.extend.console.register('gm', 'Generate static site with minified CSS and J
                 throw new Error(hexo.public_dir + " NOT found.")
             }
         }
+
     ], function(err){
         if (err) {
             util.error("[error] Minify: -> " + err.message);
         }
     });
+   var baseDir = hexo.base_dir;
+   var gzip = zlib.createGzip('level=9');
+   hexo.call('generate', function(err){
+      if (err) return callback(err);
+      var start = Date.now();
+      var traverseFileSystem = function (currentPath) {
+         var files = fs.readdirSync(currentPath);
+         for (var i in files) {
+            var currentFile = currentPath + '/' + files[i];
+            var stats = fs.statSync(currentFile);
+            if (stats.isFile()) {
+               if(currentFile.match(/\.(html)$/)) {
+                  var gzip = zlib.createGzip();
+                  var inp = fs.createReadStream(currentFile);
+                  var out = fs.createWriteStream(currentFile+'.gz');
+                  inp.pipe(gzip).pipe(out);
+                  console.log('['+'create'.green+'] '+currentFile+'.gz');
+               }
+            }
+           else if (stats.isDirectory()) {
+                  traverseFileSystem(currentFile);
+                }
+          }
+        };
+      traverseFileSystem(baseDir+'public');
+      var finish = Date.now();
+      var elapsed = (finish - start) / 1000;
+   });
 });
