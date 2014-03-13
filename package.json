@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "uglify-js": "*",
-    "imagemin" : "*",
+    "image-min" : "*",
     "clean-css": "*",
     "async"    : "*",
     "zlib"     : "*",
