@@ -32,6 +32,7 @@
     "imagemin" : "*",
     "clean-css": "*",
     "async"    : "*",
-    "zlib"     : "*"
+    "zlib"     : "*",
+    "concat-files" "*"
   }
 }

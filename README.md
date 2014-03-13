@@ -8,6 +8,7 @@ Generator for [Hexo](http://zespia.tw/hexo/) that optimizes css, js, html, and i
 - minify HTML: https://github.com/Moveo/minimize
 - gzip html: https://github.com/kkaefer/node-zlib
 - optimize images: https://github.com/kevva/image-min
+- concatenate Css & Js files : https://www.npmjs.org/package/concat-files
 
 ### Config Options
 In Hexo's `_config.yml` you can set the following options...
