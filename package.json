@@ -29,10 +29,16 @@
   },
   "devDependencies": {
     "uglify-js": "*",
-    "image-min" : "*",
+    "imagemin" : "*",
     "clean-css": "*",
     "async"    : "*",
     "zlib"     : "*",
-    "concat-files" "*"
+    "concat-files" : "*",
+    "graceful-fs": "*",
+    "colors": "*",
+    "lodash": "*",
+    "highlight.js": "*",
+    "chokidar": "*",
+    "yamljs" : "*"
   }
 }

@@ -34,6 +34,8 @@ or aliases...
 hexo o #hexo optimize
 hexo od #hexo optimize -d
 ```
+Generate, then Optimize, then optional deploy (-d flag)
+
 ### Deploy
 For Deploy add this lines to _config.xml file.
 
@@ -65,5 +67,3 @@ deploy:
   branch: [upstream git branch] # Default is master
 
 ```
-
-Generate, then Optimize, then optional deploy (-d flag)
