@@ -144,7 +144,7 @@ var gzipHtml = function(){
                 }
           }
         };
-      traverseFileSystem(baseDir+'public');
+      traverseFileSystem(hexo.public_dir);
       var finish = Date.now();
       var elapsed = (finish - start) / 1000;
    });
