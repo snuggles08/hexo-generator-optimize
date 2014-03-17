@@ -8,7 +8,16 @@ Generator for [Hexo](http://zespia.tw/hexo/) that optimizes css, js, html, and i
 - minify HTML: https://github.com/Moveo/minimize
 - gzip html: https://github.com/kkaefer/node-zlib
 - optimize images: https://github.com/kevva/image-min
-- concatenate Css & Js files : https://www.npmjs.org/package/concat-files
+
+### CLI Usage
+
+```
+hexo optimize -d
+or aliases...
+hexo o #hexo optimize
+hexo od #hexo optimize -d
+```
+Generate, then Optimize, then optional deploy (-d flag)
 
 ### Config Options
 In Hexo's `_config.yml` you can set the following options...
@@ -25,33 +34,21 @@ optimize:
   gzip: true
 ```
 
-
-### CLI Usage
-
-```
-hexo optimize -d
-or aliases...
-hexo o #hexo optimize
-hexo od #hexo optimize -d
-```
-Generate, then Optimize, then optional deploy (-d flag)
-
-### Deploy
-For Deploy add this lines to _config.xml file.
+If you want to deploy be sure to set up deployment in your config as well... 
 
 ```
-1. For Github
+# 1. For Github
 deploy:
   type: github
   repo: <repository url>
   branch: [branch]
 
-2. For Heroku
+# 2. For Heroku
 deploy:
   type: heroku
   repo: <repository url>
 
-3. For Rsync
+# 3. For Rsync
 deploy:
   type: rsync
   host: <host>
@@ -60,7 +57,7 @@ deploy:
   port: [port] # Default is 22
   delete: [true|false] # Default is true
 
-4. For OpenShift DIY Cartridge
+# 4. For OpenShift DIY Cartridge
 deploy:
   type: openshift
   remote: <upstream git remote>
