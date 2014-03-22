@@ -1,6 +1,6 @@
 {
   "name": "hexo-generator-optimize",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "Optimize assets plugin for Hexo",
   "main": "index",
   "repository": {
