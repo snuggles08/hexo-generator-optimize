@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "uglify-js": "*",
+<<<<<<< HEAD
     "image-min": "*",
     "clean-css": "*",
     "async": "*",
@@ -38,5 +39,13 @@
     "highlight.js": "*",
     "chokidar": "*",
     "yamljs" : "*"
+=======
+    "image-min" : "*",
+    "clean-css": "*",
+    "async"    : "*",
+    "zlib"     : "*",
+    "concat-files" : "*",
+    "cheerio": "*"
+>>>>>>> final
   }
 }

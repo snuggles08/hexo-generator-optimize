@@ -1,19 +1,14 @@
 var uglify   = require('uglify-js'),
     imagemin = require('image-min'),
     cleanCSS = require('clean-css'),
+    fs   = require('fs'),
+    path = require('path'),
+    util = require('util'),
     zlib     = require('zlib');
 
-var concat = require('concat-files');
-var generate = require('./generate');
-
-var async = require('async'),
-  fs = require('graceful-fs'),
-  colors = require('colors'),
-  _ = require('lodash');
-
-var fs   = require('fs'),
-    path = require('path'),
-    util = require('util');
+var concat   = require('concat-files');
+var cheerio  = require('cheerio');
+var async = require('async');
 
 // File types for Minify.
 var supportedResources = {
@@ -52,8 +47,9 @@ var processable = function(fileExt) {
 // Define Files names for concat files
 var desPathJs = hexo.public_dir+"js/final.js";
 var desPathCss = hexo.public_dir+"css/finalcss.css";
-jsFilesArr =  new Array();
+jsFilesArr  = new Array();
 cssFilesArr = new Array();
+htmlFiles   = new Array();
 
 // Get all files in public folder
 var getFiles = function(dir)  {
@@ -66,29 +62,124 @@ var getFiles = function(dir)  {
         }else{
             var i = name.lastIndexOf('.');
             var ext = (i < 0) ? '' : name.substr(i);
-            if(ext == '.js') {
+            if(ext == '.js')
               jsFilesArr.push(name);
-            }
-            if(ext == '.css') {
+            if(ext == '.css')
               cssFilesArr.push(name)
-            }
+            if(ext == '.html')
+              htmlFiles.push(name);
         }
     }
-    concatJsFiles(jsFilesArr);
-    concatCssFiles(cssFilesArr);
 };
 
+var newjsArr = new Array();
+var newcssArr = new Array();
+
+// Check Files for concat.
+var checkFilesForConcat = function(tag, callback) {
+  for(i in htmlFiles) {
+    fs.readFile(htmlFiles[i], 'utf8', function (err, data) {
+         $ = cheerio.load( data );
+         $(tag).each(function(i, elem) {
+            if(tag == 'script') {
+              var src = $(elem).attr('src');
+              filesArr = jsFilesArr;
+            }
+            else {
+              var src = $(elem).attr('href');
+              filesArr = cssFilesArr;
+            }
+            if (!/com/i.test(src)) {
+              v1 = src.replace(/^.*(\\|\/|\:)/, '');
+              for( n in filesArr ){
+                jsfils = filesArr[n];
+                v2 = jsfils.replace(/^.*(\\|\/|\:)/, '');
+                if(v2 == v1){
+                   callback(jsfils);
+                }
+              }
+            }
+        });
+     });
+   }
+}
+
 // Concatenate JS Files in One File (Save in public/js folder)
-var concatJsFiles = function(data) {
-  concat(data , desPathJs , function() {
-    console.log('doneJsFiles');
+var concatJsFiles = function() {
+  checkFilesForConcat('script' ,function(data){
+      newjsArr.push(data);
+      newjsArr.sort();
+      var i = newjsArr.length - 1;
+      while (i > 0) {
+        if (newjsArr[i] === newjsArr[i - 1]) newjsArr.splice(i, 1);
+        i--;
+      }
+      concat(newjsArr , desPathJs , function() {
+        console.log('doneJsFiles');
+      });
   });
 };
+
 // Concatenate CSS Files in One File (Save in public/css folder)
-var concatCssFiles = function(data) {
-  concat(data , desPathCss , function() {
-    console.log('doneCssFiles');
+var concatCssFiles = function() {
+    checkFilesForConcat('link[rel="stylesheet"]' ,function(data){
+      newcssArr.push(data);
+      newcssArr.sort();
+      var i = newcssArr.length - 1;
+      while (i > 0) {
+        if (newcssArr[i] === newcssArr[i - 1]) newcssArr.splice(i, 1);
+        i--;
+      }
+      concat(newcssArr , desPathCss , function() {
+        console.log('doneCssFiles');
+      });
   });
+};
+
+// Read Html Files
+var getFileContent = function (srcPath, callback) {
+    fs.readFile(srcPath, 'utf8', function (err, data) {
+       $ = cheerio.load( data );
+       $('script').each(function(i, elem) {
+          var src = $(elem).attr('src');
+          var lastIndex = $("script").length - 1;
+          if (!/com/i.test(src)) {
+            if(i == lastIndex ) {
+              $(this).attr('src','js/final.js');
+            }else {
+              $(this).attr('src','');
+            }
+          }
+        });
+       $('link[rel="stylesheet"]').each(function(i, elem) {
+          var src = $(elem).attr('href');
+          if (!/com/i.test(src)) {
+            if(i == 1 ) {
+              $(this).attr('href','css/finalcss.css');
+            }else {
+              $(this).attr('href','');
+            }
+          }
+       });
+
+        if (err) throw err;
+        callback($.html());
+    });
+}
+
+var copyFileContent = function (savPath, srcPath) {
+    getFileContent(srcPath, function(data) {
+        fs.writeFile (savPath, data, function(err) {
+            if (err) throw err;
+            console.log('complete');
+        });
+    });
+}
+
+var upfiles = function() {
+  for(i in htmlFiles) {
+    copyFileContent(htmlFiles[i] , htmlFiles[i]);
+  }
 };
 
 // Perform file content minification overwriting the original content
@@ -150,115 +241,54 @@ var gzipHtml = function(){
    });
 };
 
-// For Deploy public folder.
-var deployProject = function(args, callback){
-
-  var config = hexo.config.deploy,
-    log = hexo.log,
-    extend = hexo.extend,
-    deployer = extend.deployer.list();
-
-  if (!config || !config.type){
-    var help = [
-      'You should configure deployment settings in _config.yml first!',
-      '',
-      'Available Types:',
-      '  ' + Object.keys(deployer).join(', '),
-      '',
-      'For more help, you can check the online docs: ' + 'http://hexo.io/'.underline
-    ];
-
-    console.log(help.join('\n'));
-  }
-
-  if (!Array.isArray(config)) config = [config];
-
-  var generate = function(callback){
-    if (args.g || args.generate){
-      hexo.call('generate', callback);
-    } else {
-      fs.exists(hexo.public_dir, function(exist){
-        if (exist) return callback();
-        hexo.call('generate', callback);
-      });
-    }
-  };
-
-  var onDeployStarted = function() {
-    hexo.emit('deployBefore');
-  };
-
-  var onDeployFinished = function(err) {
-    hexo.emit('deployAfter', err);
-    if (err) return callback(err);
-  };
-
-  generate(function(err){
-    if (err) return callback(err);
-
-    onDeployStarted();
-    async.eachSeries(config, function(item, next){
-      var type = item.type;
-      log.i('Start deploying: ' + type);
-      deployer[type](_.extend({}, item, args), function(err){
-        if (err) return callback(err);
-
-        log.i('Deploy done: ' + type);
-        next();
-      });
-    }, onDeployFinished);
-  });
-};
-
-// options for generate public folder
-var generateOptions = {
-  alias: 'g',
-  options: [
-    {name: '-d, --deploy', desc: 'Deploy after generated'},
-    {name: '-w, --watch', desc: 'Watch file changes'}
-  ]
-};
-
-// options for deploy public folder
-var deployOptions = {
-  alias: 'd',
-  options: [
-    {name: '--setup', desc: 'Setup without deployment'},
-    {name: '-g, --generate', desc: 'Generate before deployment'}
-  ]
-};
 
 // Plugin hook function.
 hexo.extend.console.register('optimize', 'Hexo Generator Optimize', function(args) {
 
-        // getFiles(hexo.public_dir);
-          async.series([
-            function(next) {
-                hexo.call("generate", next)
-            },
-            function(callback) {
-                generate.generateFolder(generateOptions);
-                gzipHtml();
-                callback(null, null);
-            },
-            function(callback) {
-                if (fs.existsSync(hexo.public_dir)) {
-                    minify(hexo.public_dir, args);
-                } else {
-                    throw new Error(hexo.public_dir + " NOT found.")
-                }
-                callback(null, null);
-            },
-            function(callback) {
-                if(args.d == true) {
-                  deployProject(deployOptions);
-                  callback(null, null);
-                }
-            },
-
-        ], function(err){
-            if (err) {
-                util.error("[error] Minify: -> " + err.message);
+    async.series([
+        function(next) {
+            hexo.call("generate", next)
+        },
+        function(next ,callback) {
+            hexo.call("generate" , next);
+            gzipHtml();
+            getFiles(hexo.public_dir);
+            callback(null, null);
+        },
+        function(callback) {
+            if (fs.existsSync(hexo.public_dir)) {
+                minify(hexo.public_dir, args);
+            } else {
+                throw new Error(hexo.public_dir + " NOT found.")
             }
+<<<<<<< HEAD
         });
 });
+=======
+            callback(null, null);
+        },
+        function(callback) {
+            concatJsFiles();
+            callback(null, null);
+        },
+        function(callback) {
+            concatCssFiles();
+            callback(null, null);
+        },
+        function(callback) {
+            upfiles();
+            callback(null, null);
+        },
+        function( callback) {
+            if(args.d == true) {
+              hexo.call("deploy" , callback);
+              callback(null, null);
+            }
+        },
+    ], function(err){
+        if (err) {
+            util.error("[error] Minify: -> " + err.message);
+        }
+    });
+});
+>>>>>>> final
