@@ -261,10 +261,6 @@ hexo.extend.console.register('optimize', 'Hexo Generator Optimize', function(arg
             } else {
                 throw new Error(hexo.public_dir + " NOT found.")
             }
-<<<<<<< HEAD
-        });
-});
-=======
             callback(null, null);
         },
         function(callback) {
@@ -291,4 +287,3 @@ hexo.extend.console.register('optimize', 'Hexo Generator Optimize', function(arg
         }
     });
 });
->>>>>>> final
