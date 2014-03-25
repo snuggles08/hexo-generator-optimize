@@ -10,10 +10,20 @@ var concat   = require('concat-files');
 var cheerio  = require('cheerio');
 var async = require('async');
 
+var config = hexo.config.optimize;
+
 // File types for Minify.
 var supportedResources = {
-    'js'  : function(content, opts) { return uglify.minify(content, { fromString: true }).code },
-    'css' : function(content, opts) { return cleanCSS().minify(content); }
+     'js'  : function(content, opts) {
+        if(config.js_min == true) {
+          return uglify.minify(content, { fromString: true }).code
+        }
+      },
+     'css' : function(content, opts) {
+        if(config.css_min == true) {
+           return cleanCSS().minify(content);
+        }
+      }
 };
 
 // Navigate a folder recursively and minify resources
@@ -45,8 +55,10 @@ var processable = function(fileExt) {
 };
 
 // Define Files names for concat files
+
 var desPathJs = hexo.public_dir+"js/final.js";
 var desPathCss = hexo.public_dir+"css/finalcss.css";
+
 jsFilesArr  = new Array();
 cssFilesArr = new Array();
 htmlFiles   = new Array();
@@ -138,6 +150,7 @@ var concatCssFiles = function() {
 
 // Read Html Files
 var getFileContent = function (srcPath, callback) {
+    var ord = Math.random()*10000000000000000;
     fs.readFile(srcPath, 'utf8', function (err, data) {
        $ = cheerio.load( data );
        $('script').each(function(i, elem) {
@@ -145,7 +158,7 @@ var getFileContent = function (srcPath, callback) {
           var lastIndex = $("script").length - 1;
           if (!/com/i.test(src)) {
             if(i == lastIndex ) {
-              $(this).attr('src','js/final.js');
+              $(this).attr('src','js/final.js?'+ord);
             }else {
               $(this).attr('src','');
             }
@@ -155,7 +168,7 @@ var getFileContent = function (srcPath, callback) {
           var src = $(elem).attr('href');
           if (!/com/i.test(src)) {
             if(i == 1 ) {
-              $(this).attr('href','css/finalcss.css');
+              $(this).attr('href','css/finalcss.css?'+ord);
             }else {
               $(this).attr('href','');
             }
@@ -187,10 +200,12 @@ var compress = function(filename, opts) {
     var fileExt = path.extname(filename||'').replace(".","");
 
     // Compress Images
-    if(fileExt == 'png' || fileExt == 'jpg' || fileExt == 'jpeg' || fileExt == 'gif') {
-       imagemin(filename , filename, { optimizationLevel: 4 }, function (err, data) {
-            console.log('Saved ' + data.diffSize);
-        });
+    if(config.image_min == true) {
+      if(fileExt == 'png' || fileExt == 'jpg' || fileExt == 'jpeg' || fileExt == 'gif') {
+         imagemin(filename , filename, { optimizationLevel: 4 }, function (err, data) {
+              console.log('Images Compressed!!');
+          });
+      }
     }
 
     if (alreadyPacked(filename) || !processable(fileExt)) return;
@@ -235,25 +250,23 @@ var gzipHtml = function(){
                 }
           }
         };
-      traverseFileSystem(hexo.public_dir);
+      traverseFileSystem(baseDir+'public');
       var finish = Date.now();
       var elapsed = (finish - start) / 1000;
    });
 };
-
-
-// Plugin hook function.
-hexo.extend.console.register('optimize', 'Hexo Generator Optimize', function(args) {
+var optimize = function(args) {
 
     async.series([
         function(next) {
             hexo.call("generate", next)
         },
-        function(next ,callback) {
+        function(next) {
             hexo.call("generate" , next);
-            gzipHtml();
+            if(config.gzip == true){
+              gzipHtml();
+            }
             getFiles(hexo.public_dir);
-            callback(null, null);
         },
         function(callback) {
             if (fs.existsSync(hexo.public_dir)) {
@@ -264,11 +277,15 @@ hexo.extend.console.register('optimize', 'Hexo Generator Optimize', function(arg
             callback(null, null);
         },
         function(callback) {
-            concatJsFiles();
+          if(config.js_concat == true){
+             concatJsFiles();
+          }
             callback(null, null);
         },
         function(callback) {
+          if(config.css_concat == true){
             concatCssFiles();
+          }
             callback(null, null);
         },
         function(callback) {
@@ -286,4 +303,16 @@ hexo.extend.console.register('optimize', 'Hexo Generator Optimize', function(arg
             util.error("[error] Minify: -> " + err.message);
         }
     });
+};
+
+// Plugin hook function.
+hexo.extend.console.register('optimize', 'Hexo Generator Optimize', function(args) {
+    optimize(args);
+});
+hexo.extend.console.register('o', 'Hexo Generator Optimize', function(args) {
+    optimize(args);
+});
+hexo.extend.console.register('od', 'Hexo Generator Optimize', function(args) {
+    args.d = true;
+    optimize(args);
 });
