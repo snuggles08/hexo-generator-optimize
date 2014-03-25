@@ -1,14 +1,15 @@
 var uglify   = require('uglify-js'),
     imagemin = require('image-min'),
     cleanCSS = require('clean-css'),
-    fs   = require('fs'),
-    path = require('path'),
-    util = require('util'),
+    fs       = require('fs'),
+    path     = require('path'),
+    util     = require('util'),
     zlib     = require('zlib');
 
 var concat   = require('concat-files');
 var cheerio  = require('cheerio');
-var async = require('async');
+var async    = require('async');
+var htmlminifier   = require('html-minifier');
 
 var config = hexo.config.optimize;
 
@@ -24,6 +25,7 @@ var supportedResources = {
            return cleanCSS().minify(content);
         }
       }
+
 };
 
 // Navigate a folder recursively and minify resources
@@ -120,13 +122,10 @@ var checkFilesForConcat = function(tag, callback) {
 var concatJsFiles = function() {
   checkFilesForConcat('script' ,function(data){
       newjsArr.push(data);
-      newjsArr.sort();
-      var i = newjsArr.length - 1;
-      while (i > 0) {
-        if (newjsArr[i] === newjsArr[i - 1]) newjsArr.splice(i, 1);
-        i--;
-      }
-      concat(newjsArr , desPathJs , function() {
+      newjsArr1 = newjsArr.filter(function(elem, pos, self) {
+          return self.indexOf(elem) == pos;
+      })
+      concat(newjsArr1 , desPathJs , function() {
         console.log('doneJsFiles');
       });
   });
@@ -136,19 +135,16 @@ var concatJsFiles = function() {
 var concatCssFiles = function() {
     checkFilesForConcat('link[rel="stylesheet"]' ,function(data){
       newcssArr.push(data);
-      newcssArr.sort();
-      var i = newcssArr.length - 1;
-      while (i > 0) {
-        if (newcssArr[i] === newcssArr[i - 1]) newcssArr.splice(i, 1);
-        i--;
-      }
-      concat(newcssArr , desPathCss , function() {
+      newcssArr1 = newcssArr.filter(function(elem, pos, self) {
+          return self.indexOf(elem) == pos;
+      })
+      concat(newcssArr1 , desPathCss , function() {
         console.log('doneCssFiles');
       });
   });
 };
 
-// Read Html Files
+
 var getFileContent = function (srcPath, callback) {
     var ord = Math.random()*10000000000000000;
     fs.readFile(srcPath, 'utf8', function (err, data) {
@@ -176,7 +172,20 @@ var getFileContent = function (srcPath, callback) {
        });
 
         if (err) throw err;
-        callback($.html());
+        if(config.html_min == true) {
+          var minifiedHTML = htmlminifier.minify($.html(), {
+             removeComments: true,
+             removeCommentsFromCDATA: true,
+             collapseWhitespace: true,
+             collapseBooleanAttributes: true,
+             removeEmptyAttributes: true
+          });
+          callback(minifiedHTML);
+        }
+        else {
+          callback($.html())
+
+        }
     });
 }
 
