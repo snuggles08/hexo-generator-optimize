@@ -1,6 +1,6 @@
 # Hexo Plugin to Optimize Website Files for Deployment
 
-Generator for [Hexo](http://zespia.tw/hexo/) that optimizes css, js, html, and imgages + optionally deploys your site.
+Generator for [Hexo](http://zespia.tw/hexo/) that optimizes CSS, JS, HTML, and imgages + optionally deploys your site.
 
 - Concatenate CSS and JS: https://github.com/vvo/concat-files
 - minify CSS: https://github.com/GoalSmashers/clean-css
@@ -9,15 +9,18 @@ Generator for [Hexo](http://zespia.tw/hexo/) that optimizes css, js, html, and i
 - gzip html: https://github.com/kkaefer/node-zlib
 - optimize images: https://github.com/kevva/image-min
 
-### CLI Usage
+Your CSS and JS gets saved and inserted into your HTML as main.min.css and main.min.js with a cache-busting query string appended. We skip any CDN links.
+
+### Command Line Usage
+
+To generate, then optimize, and optionally deploy (-d flag)...
 
 ```
 hexo optimize -d
-or aliases...
+# or aliases...
 hexo o #hexo optimize
 hexo od #hexo optimize -d
 ```
-Generate, then Optimize, then optional deploy (-d flag)
 
 ### Config Options
 In Hexo's `_config.yml` you can set the following options...
@@ -26,29 +29,23 @@ In Hexo's `_config.yml` you can set the following options...
 optimize:
   # Defaults
   image_min: true
+    optimizationLevel: 4
   css_concat: true
   css_min: true
   js_concat: true
   js_min: true
   html_min: true
+    removeComments: true
+    removeCommentsFromCDATA: true
+    collapseWhitespace: true
+    collapseBooleanAttributes: true
+    removeEmptyAttributes: true
   gzip: true
 ```
 
-If you want to deploy be sure to set up deployment in your config as well... 
+If you want to deploy be sure to set up [one of the deployment options](http://hexo.io/docs/deployment.html) in your config as well. 
 
 ```
-# 1. For Github
-deploy:
-  type: github
-  repo: <repository url>
-  branch: [branch]
-
-# 2. For Heroku
-deploy:
-  type: heroku
-  repo: <repository url>
-
-# 3. For Rsync
 deploy:
   type: rsync
   host: <host>
@@ -56,11 +53,4 @@ deploy:
   root: <root>
   port: [port] # Default is 22
   delete: [true|false] # Default is true
-
-# 4. For OpenShift DIY Cartridge
-deploy:
-  type: openshift
-  remote: <upstream git remote>
-  branch: [upstream git branch] # Default is master
-
 ```
