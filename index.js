@@ -172,20 +172,20 @@ var getFileContent = function (srcPath, callback) {
        });
 
         if (err) throw err;
-        if(config.html_min == true) {
-          var minifiedHTML = htmlminifier.minify($.html(), {
-             removeComments: true,
-             removeCommentsFromCDATA: true,
-             collapseWhitespace: true,
-             collapseBooleanAttributes: true,
-             removeEmptyAttributes: true
-          });
-          callback(minifiedHTML);
-        }
-        else {
-          callback($.html())
-
-        }
+        if(typeof config.html_min == 'undefined' || config.html_min == true ){
+             var minifiedHTML = htmlminifier.minify($.html(), {
+                 removeComments: true,
+                 removeCommentsFromCDATA: true,
+                 collapseWhitespace: true,
+                 collapseBooleanAttributes: true,
+                 removeEmptyAttributes: true
+              });
+              callback(minifiedHTML);
+          }
+          else {
+              callback($.html())
+              console.log("Add html_min:true to css concat");
+          }
     });
 }
 
@@ -209,12 +209,16 @@ var compress = function(filename, opts) {
     var fileExt = path.extname(filename||'').replace(".","");
 
     // Compress Images
-    if(config.image_min == true) {
-      if(fileExt == 'png' || fileExt == 'jpg' || fileExt == 'jpeg' || fileExt == 'gif') {
-         imagemin(filename , filename, { optimizationLevel: 4 }, function (err, data) {
+    if(typeof config.image_min == 'undefined' || config.image_min == true ){
+
+        if(fileExt == 'png' || fileExt == 'jpg' || fileExt == 'jpeg' || fileExt == 'gif') {
+         imagemin(filename , filename, { optimizationLevel: 7 }, function (err, data) {
               console.log('Images Compressed!!');
           });
       }
+    }
+    else {
+        console.log("Add image_min:true to image compress");
     }
 
     if (alreadyPacked(filename) || !processable(fileExt)) return;
@@ -265,17 +269,20 @@ var gzipHtml = function(){
    });
 };
 var optimize = function(args) {
-
     async.series([
         function(next) {
             hexo.call("generate", next)
         },
         function(next) {
             hexo.call("generate" , next);
-            if(config.gzip == true){
-              gzipHtml();
-            }
             getFiles(hexo.public_dir);
+
+            if(typeof config.gzip == 'undefined' || config.gzip == true ){
+                gzipHtml();
+            }
+            else {
+                console.log("Add gzip:true to gzip");
+            }
         },
         function(callback) {
             if (fs.existsSync(hexo.public_dir)) {
@@ -286,16 +293,22 @@ var optimize = function(args) {
             callback(null, null);
         },
         function(callback) {
-          if(config.js_concat == true){
-             concatJsFiles();
+          if(typeof config.js_concat == 'undefined' || config.js_concat == true ){
+              concatJsFiles();
           }
-            callback(null, null);
+          else {
+              console.log("Add js_concat:true to js concat");
+          }
+          callback(null, null);
         },
         function(callback) {
-          if(config.css_concat == true){
-            concatCssFiles();
+          if(typeof config.css_concat == 'undefined' || config.css_concat == true ){
+              concatCssFiles();
           }
-            callback(null, null);
+          else {
+              console.log("Add css_concat:true to css concat");
+          }
+          callback(null, null);
         },
         function(callback) {
             upfiles();

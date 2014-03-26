@@ -1,23 +1,20 @@
 {
-  "name": "hexo-generator-optimize",
-  "version": "0.1.3",
-  "description": "Optimize assets plugin for Hexo",
+  "name": "hexo-optimize",
+  "version": "2.4.5",
+  "description": "console plugin for Hexo",
   "main": "index",
   "repository": {
     "type": "git",
-    "url": "git://github.com/abstracthat/hexo-generator-optimize.git"
+    "url": "git://github.com/itwars/hexo-optimize.git"
   },
   "keywords": [
-    "optimize",
-    "generator",
-    "hexo",
-    "minify",
-    "uglify",
-    "concat",
-    "image-min",
-    "gzip"
+    "website",
+    "blog",
+    "cms",
+    "framework",
+    "hexo"
   ],
-  "author": "Abstract Hat",
+  "author": "Mss",
   "license": {
     "type": "LGPL",
     "url": ""
@@ -26,19 +23,17 @@
     "hexo": "*"
   },
   "dependencies": {
+    "uglify-js": "2.3.x",
+    "css-condense": "0.0.6",
+    "async": "0.2.x"
+  },
+  "devDependencies": {
     "uglify-js": "*",
-    "image-min": "*",
+    "image-min" : "0.1.3",
     "clean-css": "*",
-    "async": "*",
-    "zlib": "*",
-    "concat-files": "*",
-    "graceful-fs": "*",
-    "colors": "*",
-    "lodash": "*",
-    "highlight.js": "*",
-    "chokidar": "*",
-    "yamljs" : "*",
-    "cheerio": "*",
-    "html-minifier": "*"
+    "async"    : "*",
+    "zlib"     : "*",
+    "concat-files" : "*",
+    "cheerio": "*"
   }
 }
