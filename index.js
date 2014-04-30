@@ -95,15 +95,16 @@ var checkFilesForConcat = function(tag, callback) {
     fs.readFile(htmlFiles[i], 'utf8', function (err, data) {
          $ = cheerio.load( data );
          $(tag).each(function(i, elem) {
+            var src;
             if(tag == 'script') {
-              var src = $(elem).attr('src');
+              src = $(elem).attr('src');
               filesArr = jsFilesArr;
             }
             else {
-              var src = $(elem).attr('href');
+              src = $(elem).attr('href');
               filesArr = cssFilesArr;
             }
-            if (!/com/i.test(src)) {
+            if (src && (!/com/i.test(src)) ) {
               v1 = src.replace(/^.*(\\|\/|\:)/, '');
               for( n in filesArr ){
                 jsfils = filesArr[n];
