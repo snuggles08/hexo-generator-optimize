@@ -13,36 +13,58 @@ var htmlminifier   = require('html-minifier');
 
 var config = hexo.config.optimize;
 
+//var promisify = require('deferred').promisify
+//var readdir = promisify(fs.readdirSync), stat = promisify(fs.statSync)
+
 // File types for Minify.
 var supportedResources = {
      'js'  : function(content, opts) {
-        if(config.js_min == true) {
+        if(config.js_min == undefined || config.js_min == true) {
           return uglify.minify(content, { fromString: true }).code
         }
       },
      'css' : function(content, opts) {
-        if(config.css_min == true) {
+        if(config.css_min == undefined || config.css_min == true) {
            return cleanCSS().minify(content);
         }
       }
 
 };
 
-// Navigate a folder recursively and minify resources
-var minify = function(item, opts) {
-  fs.readdir(item, function(err, files) {
-      if (!files) return;
-      files.forEach(function(file) {
-          var target = path.join(item, file);
-          var stats = fs.statSync(target);
-          if ( stats.isDirectory() ) {
-              minify(target, opts);
-          } else if (stats.isFile()) {
-              compress(target, opts);
-          }
-      });
+// synchronized recursively following 
+// http://stackoverflow.com/a/5958696
+var minify = function(dir, opts,cb) {
+  fs.readdir(dir, function(err, files) {
+      if (err || files.length == 0){
+        cb();
+      } else{
+        var n = files.length;
+        var cb_n = function(callback){
+          return function(){
+            --n || callback();
+          };
+        };
+        each = function(f,p){
+          return function(err,stats){
+            if(err){
+              cb(err);
+            } else{
+              if (stats.isDirectory()){
+                minify(p,opts,cb_n(cb));
+              }else if (stats.isFile()){
+                compress(p,opts,cb_n(cb));
+              }
+            }
+          };
+        };
+        files.forEach(function(f) {
+            var p = path.join(dir,f);
+            fs.stat(p,each(f,p));
+        });
+      }
   });
 };
+
 
 // ignore files that are already minified
 var alreadyPacked = function(filename) {
@@ -120,7 +142,7 @@ var checkFilesForConcat = function(tag, callback) {
 }
 
 // Concatenate JS Files in One File (Save in public/js folder)
-var concatJsFiles = function() {
+var concatJsFiles = function(cb) {
   checkFilesForConcat('script' ,function(data){
       newjsArr.push(data);
       newjsArr1 = newjsArr.filter(function(elem, pos, self) {
@@ -202,7 +224,7 @@ var upfiles = function() {
 };
 
 // Perform file content minification overwriting the original content
-var compress = function(filename, opts) {
+var compress = function(filename, opts,cb) {
     var fileExt = path.extname(filename||'').replace(".","");
 
     // Compress Images
@@ -215,7 +237,9 @@ var compress = function(filename, opts) {
       }
     }
 
-    if (alreadyPacked(filename) || !processable(fileExt)) return;
+    if (alreadyPacked(filename) || !processable(fileExt)){
+      return cb();
+    } else {
     var originalContent = fs.readFileSync(filename).toString();
     var minifiedContent = supportedResources[fileExt](originalContent, opts);
     if (minifiedContent) {
@@ -226,13 +250,18 @@ var compress = function(filename, opts) {
             if ( err ) throw err;
             fs.writeFile(filename, minifiedContent, 'utf8', function(err) {
                 if (err) throw err;
+                cb();
             })
         });
+    }else{
+      cb();
     }
+    }
+
 };
 
 // Gzip Html files of public folder
-var gzipHtml = function(){
+var gzipHtml = function(cb){
    var baseDir = hexo.base_dir;
    var gzip = zlib.createGzip('level=9');
    var start = Date.now();
@@ -261,44 +290,57 @@ var gzipHtml = function(){
 };
 var optimize = function(args) {
     async.series([
-        function(next) {
-            hexo.call("generate", next)
-        },
-        function(next) {
-            getFiles(hexo.public_dir);
-            if(typeof config.gzip == 'undefined' || config.gzip == true ){
-                gzipHtml();
-            }
-            next(null,null);
+        function(callback) {
+            hexo.call("generate", callback)
         },
         function(callback) {
             if (fs.existsSync(hexo.public_dir)) {
-                minify(hexo.public_dir, args);
+                minify(hexo.public_dir, args,function(err){
+                  callback(null, null);
+                });
             } else {
                 throw new Error(hexo.public_dir + " NOT found.")
             }
-            callback(null, null);
         },
         function(callback) {
-          if(typeof config.js_concat == 'undefined' || config.js_concat == true ){
-              concatJsFiles();
+          getFiles(hexo.public_dir);
+          if(typeof config.js_concat == undefined || config.js_concat == true ){
+              console.log('begin concat js');
+              concatJsFiles(function(err){
+                callback(null, null);
+              });
+          }else{
+            callback(null,null);
           }
-          callback(null, null);
         },
         function(callback) {
-          if(typeof config.css_concat == 'undefined' || config.css_concat == true ){
-              concatCssFiles();
+          if(typeof config.css_concat == undefined || config.css_concat == true ){
+              console.log('begin concat css');
+              concatCssFiles(function(){
+                callback(null, null);
+              });
+          }else{
+            callback(null,null);
           }
-          callback(null, null);
         },
+//        function(callback) {
+//          console.log('4')
+//            upfiles(function(){
+//              callback(null, null);
+//            });
+//        },
         function(callback) {
-            upfiles();
-            callback(null, null);
+            if(typeof config.gzip == undefined || config.gzip == true ){
+                gzipHtml(function(){
+                  callback(null,null);
+                });
+            }else{
+              callback(null,null);
+            }
         },
         function( callback) {
             if(args.d == true) {
               hexo.call("deploy" , callback);
-              callback(null, null);
             }
         },
     ], function(err){
