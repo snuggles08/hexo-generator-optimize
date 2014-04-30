@@ -1,5 +1,6 @@
 # Hexo Plugin to Optimize Website Files for Deployment
 
+
 Generator for [Hexo](http://zespia.tw/hexo/) that optimizes CSS, JS, HTML, and imgages + optionally deploys your site.
 
 - Concatenate CSS and JS: https://github.com/vvo/concat-files
@@ -10,6 +11,10 @@ Generator for [Hexo](http://zespia.tw/hexo/) that optimizes CSS, JS, HTML, and i
 - optimize images: https://github.com/kevva/image-min
 
 Your CSS and JS gets saved and inserted into your HTML as main.min.css and main.min.js with a cache-busting query string appended. We skip any CDN links.
+
+### Notice
+concatenate seems doesn't work well , if you deploy with nginx 
+I'm trying to review the code and fix the bugs.
 
 ### Command Line Usage
 
