@@ -271,7 +271,7 @@ var optimize = function(args) {
             hexo.call("generate", next)
         },
         function(next) {
-            hexo.call("generate" , next);
+            //hexo.call("generate" , next);
             getFiles(hexo.public_dir);
 
             if(typeof config.gzip == 'undefined' || config.gzip == true ){
