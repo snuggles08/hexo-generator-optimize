@@ -241,32 +241,29 @@ var compress = function(filename, opts) {
 var gzipHtml = function(){
    var baseDir = hexo.base_dir;
    var gzip = zlib.createGzip('level=9');
-   hexo.call('generate', function(err){
-      if (err) throw(err);
-      var start = Date.now();
-      var traverseFileSystem = function (currentPath) {
-         var files = fs.readdirSync(currentPath);
-         for (var i in files) {
-            var currentFile = currentPath + '/' + files[i];
-            var stats = fs.statSync(currentFile);
-            if (stats.isFile()) {
-               if(currentFile.match(/\.(html)$/)) {
-                  var gzip = zlib.createGzip();
-                  var inp = fs.createReadStream(currentFile);
-                  var out = fs.createWriteStream(currentFile+'.gz');
-                  inp.pipe(gzip).pipe(out);
-                  console.log('['+'create'.green+'] '+currentFile+'.gz');
-               }
+   var start = Date.now();
+   var traverseFileSystem = function (currentPath) {
+      var files = fs.readdirSync(currentPath);
+      for (var i in files) {
+         var currentFile = currentPath + '/' + files[i];
+         var stats = fs.statSync(currentFile);
+         if (stats.isFile()) {
+            if(currentFile.match(/\.(html)$/)) {
+               var gzip = zlib.createGzip();
+               var inp = fs.createReadStream(currentFile);
+               var out = fs.createWriteStream(currentFile+'.gz');
+               inp.pipe(gzip).pipe(out);
+               console.log('['+'create'.green+'] '+currentFile+'.gz');
             }
-           else if (stats.isDirectory()) {
-                  traverseFileSystem(currentFile);
-                }
-          }
-        };
-      traverseFileSystem(baseDir+'public');
-      var finish = Date.now();
-      var elapsed = (finish - start) / 1000;
-   });
+         }
+        else if (stats.isDirectory()) {
+               traverseFileSystem(currentFile);
+             }
+       }
+     };
+   traverseFileSystem(baseDir+'public');
+   var finish = Date.now();
+   var elapsed = (finish - start) / 1000;
 };
 var optimize = function(args) {
     async.series([
