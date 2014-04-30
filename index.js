@@ -126,7 +126,6 @@ var concatJsFiles = function() {
           return self.indexOf(elem) == pos;
       })
       concat(newjsArr1 , desPathJs , function() {
-        console.log('doneJsFiles');
       });
   });
 };
@@ -139,7 +138,6 @@ var concatCssFiles = function() {
           return self.indexOf(elem) == pos;
       })
       concat(newcssArr1 , desPathCss , function() {
-        console.log('doneCssFiles');
       });
   });
 };
@@ -184,7 +182,6 @@ var getFileContent = function (srcPath, callback) {
           }
           else {
               callback($.html())
-              console.log("Add html_min:true to css concat");
           }
     });
 }
@@ -193,7 +190,6 @@ var copyFileContent = function (savPath, srcPath) {
     getFileContent(srcPath, function(data) {
         fs.writeFile (savPath, data, function(err) {
             if (err) throw err;
-            console.log('complete');
         });
     });
 }
@@ -216,9 +212,6 @@ var compress = function(filename, opts) {
               console.log('Images Compressed!!');
           });
       }
-    }
-    else {
-        console.log("Add image_min:true to image compress");
     }
 
     if (alreadyPacked(filename) || !processable(fileExt)) return;
@@ -271,15 +264,11 @@ var optimize = function(args) {
             hexo.call("generate", next)
         },
         function(next) {
-            //hexo.call("generate" , next);
             getFiles(hexo.public_dir);
-
             if(typeof config.gzip == 'undefined' || config.gzip == true ){
                 gzipHtml();
             }
-            else {
-                console.log("Add gzip:true to gzip");
-            }
+            next(null,null);
         },
         function(callback) {
             if (fs.existsSync(hexo.public_dir)) {
@@ -293,17 +282,11 @@ var optimize = function(args) {
           if(typeof config.js_concat == 'undefined' || config.js_concat == true ){
               concatJsFiles();
           }
-          else {
-              console.log("Add js_concat:true to js concat");
-          }
           callback(null, null);
         },
         function(callback) {
           if(typeof config.css_concat == 'undefined' || config.css_concat == true ){
               concatCssFiles();
-          }
-          else {
-              console.log("Add css_concat:true to css concat");
           }
           callback(null, null);
         },
