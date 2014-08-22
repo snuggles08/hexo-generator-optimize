@@ -1,6 +1,6 @@
 {
   "name": "hexo-optimize",
-  "version": "2.4.5",
+  "version": "2.4.6",
   "description": "console plugin for Hexo",
   "main": "index",
   "repository": {
