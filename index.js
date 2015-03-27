@@ -307,7 +307,7 @@ var optimize = function(args) {
               hexo.call("deploy" , callback);
               callback(null, null);
             }
-        },
+        }
     ])
     .catch(function(err){
         if (err) {
