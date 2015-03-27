@@ -305,8 +305,8 @@ var optimize = function(args) {
             function( callback) {
                 if(args.d === true) {
                   hexo.call("deploy" , callback);
-                  callback(null, null);
                 }
+                callback(null, null);
             },
             function(err){
                 if (err) {
