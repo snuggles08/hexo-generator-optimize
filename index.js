@@ -9,9 +9,10 @@ var uglify   = require('uglify-js'),
     cheerio  = require('cheerio'),
     async    = require('async'),
     merge    = require('merge'),
+    yaml     = require('js-yaml');
     htmlminifier = require('html-minifier');
 
-var config = hexo.config.optimize;
+var config = merge(hexo.config.optimize, yaml.load(fs.readFile('defaultconfig.yml')));
 
 // File types for Minify.
 var supportedResources = {
