@@ -33,6 +33,7 @@
     "clean-css": "*",
     "concat-files" : "*",
     "cheerio": "*",
-    "merge": "*"
+    "merge": "*",
+    "js-yaml": "*"
   }
 }
