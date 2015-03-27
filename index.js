@@ -235,7 +235,9 @@ var compress = function(filename, opts) {
 // Gzip Html files of public folder
 var gzipHtml = function(){
    var baseDir = hexo.base_dir;
-   var gzip = zlib.createGzip('level=9');
+   var gzip = zlib.createGzip({
+       level: 9
+   });
    hexo.call('generate', function(err){
       if (err) throw(err);
       var start = Date.now();
