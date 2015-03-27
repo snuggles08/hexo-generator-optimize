@@ -8,6 +8,7 @@ var uglify   = require('uglify-js'),
     concat   = require('concat-files'),
     cheerio  = require('cheerio'),
     async    = require('async'),
+    merge    = require('merge'),
     htmlminifier = require('html-minifier');
 
 var config = hexo.config.optimize;
