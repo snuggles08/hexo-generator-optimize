@@ -1,0 +1,14 @@
+optimize:
+  image_min: true
+    optimizationLevel: 4
+  css_concat: true
+  css_min: true
+  js_concat: true
+  js_min: true
+  html_min: true
+    removeComments: true
+    removeCommentsFromCDATA: true
+    collapseWhitespace: true
+    collapseBooleanAttributes: true
+    removeEmptyAttributes: true
+  gzip: true
