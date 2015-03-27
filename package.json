@@ -1,5 +1,5 @@
 {
-  "name": "hexo-optimize",
+  "name": "hexo-generator-optimize",
   "version": "2.4.6",
   "description": "console plugin for Hexo",
   "main": "index",
