@@ -173,7 +173,7 @@ var getFileContent = function (srcPath, callback) {
        });
 
         if (err) throw err;
-        if(config.html_min === true) {
+        if(config.html_min.run === true) {
           var minifiedHTML = htmlminifier.minify($.html(), {
              removeComments: true,
              removeCommentsFromCDATA: true,
@@ -210,7 +210,7 @@ var compress = function(filename, opts) {
     var fileExt = path.extname(filename||'').replace(".","");
 
     // Compress Images
-    if(config.image_min === true) {
+    if(config.image_min.run === true) {
       if(fileExt == 'png' || fileExt == 'jpg' || fileExt == 'jpeg' || fileExt == 'gif') {
          imagemin(filename , filename, { optimizationLevel: 4 }, function (err, data) {
               console.log('Images Compressed!!');
