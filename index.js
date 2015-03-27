@@ -308,7 +308,8 @@ var optimize = function(args) {
               callback(null, null);
             }
         },
-    ], function(err){
+    ])
+    .catch(function(err){
         if (err) {
             util.error("[error] Minify: -> " + err.message);
         }
