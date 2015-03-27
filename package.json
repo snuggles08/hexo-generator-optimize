@@ -26,7 +26,8 @@
     "uglify-js": "2.3.x",
     "css-condense": "0.0.6",
     "async": "0.2.x",
-    "html-minifier":"*"
+    "html-minifier":"*",
+    "source-map": "*"
   },
   "devDependencies": {
     "uglify-js": "*",
