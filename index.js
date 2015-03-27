@@ -266,57 +266,53 @@ var gzipHtml = function(){
    });
 };
 var optimize = function(args) {
-    try {
-        async.series([
-            function(next) {
-                hexo.call("generate", next);
-            },
-            function(next) {
-                hexo.call("generate" , next);
-                if(config.gzip === true){
-                  gzipHtml();
-                }
-                getFiles(hexo.public_dir);
-            },
-            function(callback) {
-                if (fs.existsSync(hexo.public_dir)) {
-                    minify(hexo.public_dir, args);
-                } else {
-                    throw new Error(hexo.public_dir + " NOT found.");
-                }
-                callback(null, null);
-            },
-            function(callback) {
-              if(config.js_concat === true){
-                 concatJsFiles();
-              }
-                callback(null, null);
-            },
-            function(callback) {
-              if(config.css_concat === true){
-                concatCssFiles();
-              }
-                callback(null, null);
-            },
-            function(callback) {
-                upfiles();
-                callback(null, null);
-            },
-            function( callback) {
-                if(args.d === true) {
-                  hexo.call("deploy" , callback);
-                }
-                callback(null, null);
-            },
-            function(err){
-                if (err) {
-                    util.error("[error] Minify: -> " + err.message);
-                }
+    async.series([
+        function(next) {
+            hexo.call("generate", next);
+        },
+        function(next) {
+            hexo.call("generate" , next);
+            if(config.gzip === true){
+              gzipHtml();
             }
-        ]);
-    } catch(e) {
-        
-    }
+            getFiles(hexo.public_dir);
+        },
+        function(callback) {
+            if (fs.existsSync(hexo.public_dir)) {
+                minify(hexo.public_dir, args);
+            } else {
+                throw new Error(hexo.public_dir + " NOT found.");
+            }
+            callback(null, null);
+        },
+        function(callback) {
+          if(config.js_concat === true){
+             concatJsFiles();
+          }
+            callback(null, null);
+        },
+        function(callback) {
+          if(config.css_concat === true){
+            concatCssFiles();
+          }
+            callback(null, null);
+        },
+        function(callback) {
+            upfiles();
+            callback(null, null);
+        },
+        function( callback) {
+            if(args.d === true) {
+              hexo.call("deploy" , callback);
+            }
+            callback(null, null);
+        },
+        function(err){
+            if (err) {
+                util.error("[error] Minify: -> " + err.message);
+            }
+        }
+    ]);
 };
 
 // Plugin hook function.
