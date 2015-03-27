@@ -20,7 +20,7 @@ I'm trying to review the code and fix the bugs.
 
 To generate, then optimize, and optionally deploy (-d flag)...
 
-```
+```bash
 hexo optimize -d
 # or aliases...
 hexo o #hexo optimize
@@ -30,16 +30,18 @@ hexo od #hexo optimize -d
 ### Config Options
 In Hexo's `_config.yml` you can set the following options...
 
-```
+```yml
 optimize:
   # Defaults
-  image_min: true
+  image_min:
+    run: true
     optimizationLevel: 4
   css_concat: true
   css_min: true
   js_concat: true
   js_min: true
-  html_min: true
+  html_min:
+    run: true
     removeComments: true
     removeCommentsFromCDATA: true
     collapseWhitespace: true
@@ -50,7 +52,7 @@ optimize:
 
 If you want to deploy be sure to set up [one of the deployment options](http://hexo.io/docs/deployment.html) in your config as well. 
 
-```
+```yml
 deploy:
   type: rsync
   host: <host>
