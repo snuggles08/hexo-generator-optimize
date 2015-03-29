@@ -14,6 +14,8 @@ var uglify   = require('uglify-js'),
 
 var config = merge.recursive(hexo.config.optimize, yaml.load(fs.readFileSync(path.join(__dirname, 'defaultconfig.yml'))));
 
+console.log(config);
+
 // File types for Minify.
 var supportedResources = {
      'js': function(content, opts) {
