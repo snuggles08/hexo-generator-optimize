@@ -12,7 +12,7 @@ var uglify   = require('uglify-js'),
     yaml     = require('js-yaml');
     htmlminifier = require('html-minifier');
 
-var config = merge(hexo.config.optimize, yaml.load(fs.readFileSync('defaultconfig.yml')));
+var config = merge(hexo.config.optimize, yaml.load(fs.readFileSync(path.join(__dirname, 'defaultconfig.yml'))));
 
 // File types for Minify.
 var supportedResources = {
