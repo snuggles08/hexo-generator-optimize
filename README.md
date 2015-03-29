@@ -1,7 +1,7 @@
 # Hexo Plugin to Optimize Website Files for Deployment
 
 
-Generator for [Hexo](http://zespia.tw/hexo/) that optimizes CSS, JS, HTML, and imgages + optionally deploys your site.
+Generator for [Hexo](http://hexo.io/) that optimizes CSS, JS, HTML, and images + optionally deploys your site.
 
 - Concatenate CSS and JS: https://github.com/vvo/concat-files
 - minify CSS: https://github.com/GoalSmashers/clean-css
